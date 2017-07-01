@@ -16,17 +16,20 @@ public class NetworkUtils {
 
     private static final String NEWSAPI_BASE_URL = "https://newsapi.org/v1/articles";
 
-    private static final String PARAM_SOURCE = "source=the-next-web";
+    private static final String PARAM_SOURCE = "source";
+    private static final String source = "the-next-web";
 
-    private static final String PARAM_SORT = "sortBy=latest";
+    private static final String PARAM_SORT = "sortBy";
+    private static final String sortBy ="latest";
 
-    private static final String PARAM_APIKEY = "9b34213d4efa4824903dd8c2212b85ee";
+    private static final String PARAM_APIKEY = "apiKey";
+    private static final String key = ""; //Enter your own API key
 
-    public static URL buildUrl(String newsQuery, String source, String sortBy, String apiKey) {
+    public static URL buildUrl() {
         Uri builtUri = Uri.parse(NEWSAPI_BASE_URL).buildUpon()
                 .appendQueryParameter(PARAM_SOURCE, source)
                 .appendQueryParameter(PARAM_SORT, sortBy)
-                .appendQueryParameter(PARAM_APIKEY, apiKey)
+                .appendQueryParameter(PARAM_APIKEY, key)
                 .build();
 
         URL url = null;
