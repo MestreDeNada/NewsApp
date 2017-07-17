@@ -1,36 +1,64 @@
 package edu.calstatela.cs594.rickbennett.newsapp;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import org.json.JSONException;
+
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements NewsAdapter.NewsItemClickListener {
 
-    TextView mSearchResultsTextView;
+    private RecyclerView mRecyclerView;
 
-    ProgressBar mLoadingIndicator;
+    private NewsAdapter mNewsAdapter;
+
+    private ProgressBar mLoadingIndicator;
+
+    public final static String URLKEY = "url";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mSearchResultsTextView = (TextView) findViewById(R.id.tv_news_search_results_json);
+        mRecyclerView = (RecyclerView) findViewById(R.id.recyclerview_news);
+
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
+
+        mRecyclerView.setLayoutManager(layoutManager);
+
+        mRecyclerView.setHasFixedSize(true);
+
+        mNewsAdapter = new NewsAdapter(this);
+
+        mRecyclerView.setAdapter(mNewsAdapter);
 
         mLoadingIndicator = (ProgressBar) findViewById(R.id.pb_loading_indicator);
 
         makeNewsSearchQuery();
     }
 
+        @Override
+        public void onClick(int clickedItemIndex) {
+            String url = mNewsAdapter.getNewsItem(clickedItemIndex).getUrl();
+            Intent intent = new Intent(MainActivity.this, Web.class);
+            intent.putExtra(URLKEY, url);
+            startActivity(intent);
+        }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -42,8 +70,8 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
 
-        if (id == R.id.action_search) {
-            mSearchResultsTextView.setText("");
+        if (id == R.id.action_refresh) {
+            mNewsAdapter.setNewsData(null);
             makeNewsSearchQuery();
             return true;
         }
@@ -51,7 +79,7 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public class FetchNewsTask extends AsyncTask<URL, Void, String> {
+    public class FetchNewsTask extends AsyncTask<URL, Void, ArrayList<NewsItem>> {
 
         @Override
         protected void onPreExecute() {
@@ -60,24 +88,26 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        protected String doInBackground(URL... params) {
+        protected ArrayList<NewsItem> doInBackground(URL... params) {
             URL searchUrl = params[0];
-            String newsSearchResults = null;
+            ArrayList<NewsItem> newsSearchResults = null;
             try {
-                newsSearchResults = NetworkUtils.getResponseFromHttpUrl(searchUrl);
+                String json = NetworkUtils.getResponseFromHttpUrl(searchUrl);
+                newsSearchResults = NetworkUtils.parseJSON(json);
             } catch (IOException e) {
+                e.printStackTrace();
+            } catch (JSONException e) {
                 e.printStackTrace();
             }
             return newsSearchResults;
         }
 
         @Override
-        protected void onPostExecute(String s) {
-            mLoadingIndicator.setVisibility(View.INVISIBLE);
-            if (s != null && !s.equals("")) {
-                mSearchResultsTextView.setText(s);
-            }
+        protected void onPostExecute(ArrayList<NewsItem> news) {
+            mLoadingIndicator.setVisibility(View.GONE);
+            if (news != null) { mNewsAdapter.setNewsData(news); }
         }
+
     }
 
     private void makeNewsSearchQuery() {
