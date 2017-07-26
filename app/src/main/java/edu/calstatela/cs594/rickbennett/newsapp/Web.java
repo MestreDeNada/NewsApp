@@ -16,9 +16,10 @@ public class Web extends AppCompatActivity {
         setContentView(R.layout.activity_web);
 
         Intent intent = getIntent();
-        String url = intent.getStringExtra(MainActivity.URLKEY);
-
-        WebView webView = (WebView) findViewById(R.id.wv_webview);
-        webView.loadUrl(url);
+        if (intent.hasExtra(Intent.EXTRA_TEXT)) {
+            String url = intent.getStringExtra(Intent.EXTRA_TEXT);
+            WebView webView = (WebView) findViewById(R.id.wv_webview);
+            webView.loadUrl(url);
+        }
     }
 }
