@@ -5,12 +5,12 @@ import android.content.Intent;
 //import android.content.Loader;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -56,7 +56,7 @@ public class MainActivity extends AppCompatActivity implements NewsAdapter.NewsI
 
         mLoadingIndicator = (ProgressBar) findViewById(R.id.pb_loading_indicator);
 
-        makeNewsSearchQuery();
+        newsSearch();
     }
 
     @Override
@@ -79,7 +79,7 @@ public class MainActivity extends AppCompatActivity implements NewsAdapter.NewsI
 
         if (id == R.id.action_refresh) {
             mNewsAdapter.setNewsData(null);
-            makeNewsSearchQuery();
+            newsSearch();
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -90,6 +90,7 @@ public class MainActivity extends AppCompatActivity implements NewsAdapter.NewsI
     public Loader<ArrayList> onCreateLoader(int id, final Bundle args) {
         //Homework 4: return a new AsyncTaskLoader of type ArrayList and context this as anonymous inner class.
         //Override onStartLoading and loadInBackground.
+        Log.d("test", "loader initialized");
         return new AsyncTaskLoader<ArrayList>(this) {
             @Override
             protected void onStartLoading() {
@@ -106,12 +107,14 @@ public class MainActivity extends AppCompatActivity implements NewsAdapter.NewsI
             public ArrayList<NewsItem> loadInBackground() {
                 //Get news search URL string from the args parameter.
                 String newsSearchUrlString = args.getString(NEWS_SEARCH_URL_EXTRA);
+                Log.d("test", "loading");
                 //If String is null or empty, return null.
                 if (newsSearchUrlString == null || TextUtils.isEmpty(newsSearchUrlString)) return null;
                 //Logic from doInBackground goes here.
                 try {
                     //Change string to URL, send to NetworkUtils, and get back a JSON string.
                     String json = NetworkUtils.getResponseFromHttpUrl(new URL(newsSearchUrlString));
+                    Log.d("test", "json: " + json);
                     //Return the retrieved JSON string as an ArrayList of NewsItems.
                     return NetworkUtils.parseJSON(json);
                 } catch (IOException | JSONException e) {
@@ -167,8 +170,10 @@ public class MainActivity extends AppCompatActivity implements NewsAdapter.NewsI
 
     }
 */
-    private void makeNewsSearchQuery() {
+    private void newsSearch() {
+        //Get news URL from NetworkUtils. Someday, add feature to allow to select news source.
         URL newsSearchUrl = NetworkUtils.buildUrl();
+
         //Homework 4: Remove call to AsyncTask.
         //new FetchNewsTask().execute(newsSearchUrl);
 
@@ -180,7 +185,11 @@ public class MainActivity extends AppCompatActivity implements NewsAdapter.NewsI
         LoaderManager loaderManager = getSupportLoaderManager();
         //Call getLoader and pass it the loader identification.
         Loader<ArrayList> newsLoader = loaderManager.getLoader(FETCH_NEWS_LOADER);
-        //Initialize loader.
-        if (newsLoader == null) loaderManager.initLoader(FETCH_NEWS_LOADER, queryBundle, this);
+        //Initialize or restart loader as necessary.
+        if (newsLoader == null) {
+            loaderManager.initLoader(FETCH_NEWS_LOADER, queryBundle, this);
+        }else {
+            loaderManager.restartLoader(FETCH_NEWS_LOADER, queryBundle, this);
+        }
     }
 }
