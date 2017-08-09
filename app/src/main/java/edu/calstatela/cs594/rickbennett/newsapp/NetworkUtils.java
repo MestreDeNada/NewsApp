@@ -1,6 +1,9 @@
 package edu.calstatela.cs594.rickbennett.newsapp;
 
+import android.content.Context;
 import android.net.Uri;
+import android.util.Log;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -13,6 +16,14 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Scanner;
+
+import com.firebase.jobdispatcher.Constraint;
+import com.firebase.jobdispatcher.FirebaseJobDispatcher;
+import com.firebase.jobdispatcher.GooglePlayDriver;
+import com.firebase.jobdispatcher.Job;
+import com.firebase.jobdispatcher.Lifetime;
+import com.firebase.jobdispatcher.Trigger;
+
 
 /**
  * Created by Rick on 6/28/17.
@@ -28,7 +39,7 @@ public class NetworkUtils {
     private static final String sortBy ="latest";
 
     private static final String PARAM_APIKEY = "apiKey";
-    private static final String key = ""; //Enter your own API key
+    private static final String key = "9b34213d4efa4824903dd8c2212b85ee"; //Enter your own API key
 
     public static URL buildUrl() {
         Uri builtUri = Uri.parse(NEWSAPI_BASE_URL).buildUpon()
@@ -75,5 +86,38 @@ public class NetworkUtils {
             itemList.add(newsItem);
         }
         return itemList;
+    }
+
+    //Homework 4 firebase: Added this method for Firebase job dispatcher.
+    //Update news every minute.
+    private static final int SCHEDULE_INTERVAL_SECONDS = 60;
+    private static final int SYNC_FLEXTIME_SECONDS = 60;
+    private static final String NEWS_JOB_TAG = "news_job_tag";
+    private static boolean scheduleInitialized;
+
+    synchronized public static void scheduleNewsUpdate(final Context context) {
+        Log.d("NetworkUtils", "scheduleNewsUpdate called");
+        if(scheduleInitialized) return;
+
+        Log.d("NetworkUtils", "Firebase dispatcher running");
+        FirebaseJobDispatcher dispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(context));
+
+        Log.d("NetworkUtil", "updateNewsJob initiated");
+        Job updateNewsJob = dispatcher.newJobBuilder()
+                .setService(NewsJob.class)
+                .setTag(NEWS_JOB_TAG)
+                .setConstraints(Constraint.ON_ANY_NETWORK)
+                .setLifetime(Lifetime.FOREVER)
+                .setRecurring(true)
+                .setTrigger(Trigger.executionWindow(SCHEDULE_INTERVAL_SECONDS,
+                        SCHEDULE_INTERVAL_SECONDS + SYNC_FLEXTIME_SECONDS))
+                .setReplaceCurrent(true)
+                .build();
+
+        Log.d("NetworkUtil", "updateNewsJob built");
+        dispatcher.schedule(updateNewsJob);
+        Log.d("NetworkUtil", "updateNewsJob scheduled");
+        Toast.makeText(context, "updateNewsJob scheduled", Toast.LENGTH_LONG).show();
+        scheduleInitialized = true;
     }
 }

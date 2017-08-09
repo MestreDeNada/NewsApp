@@ -45,19 +45,20 @@ public class MainActivity extends AppCompatActivity implements NewsAdapter.NewsI
 
         mRecyclerView = (RecyclerView) findViewById(R.id.recyclerview_news);
 
+        //mLoadingIndicator = (ProgressBar) findViewById(R.id.pb_loading_indicator);
+
         LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
-
         mRecyclerView.setLayoutManager(layoutManager);
-
         mRecyclerView.setHasFixedSize(true);
 
-        //Homework 4 database: move these two items to the AsyncTaskLoader.
-        //mNewsAdapter = new NewsAdapter(cursor, this);
-        //mRecyclerView.setAdapter(mNewsAdapter);
-
-        mLoadingIndicator = (ProgressBar) findViewById(R.id.pb_loading_indicator);
+        //Homework 4 database: move these items to the AsyncTaskLoader.
+        /*mNewsAdapter = new NewsAdapter(cursor, this);
+        mRecyclerView.setAdapter(mNewsAdapter);*/
 
         loadNews();
+
+        //Homework 4 firebase; Call the scheduleNewUpdate method to start updating the news automatically.
+        NetworkUtils.scheduleNewsUpdate(this);
     }
 
     //Homework 4 database: Add cursor and change code to get url from database.
@@ -94,16 +95,16 @@ public class MainActivity extends AppCompatActivity implements NewsAdapter.NewsI
     public Loader<Void> onCreateLoader(int id, final Bundle args) {
         //Homework 4: return a new AsyncTaskLoader of type ArrayList and context this as anonymous inner class.
         //Override onStartLoading and loadInBackground.
-        Log.d("test", "loader initialized");
+        Log.d("MainActivity", "loader initialized");
         return new AsyncTaskLoader<Void>(this) {
             @Override
             protected void onStartLoading() {
                 super.onStartLoading();
-                mLoadingIndicator.setVisibility(View.VISIBLE);
+                //mLoadingIndicator.setVisibility(View.VISIBLE);
             }
             @Override
             public Void loadInBackground() {
-                Log.d("test", "loading");
+                Log.d("MainActivity", "loading");
                 //Homework 4 database: DatabaseUtils has function to load the database.
                 DatabaseUtils.refreshDatabase(MainActivity.this);
                 return null;
@@ -113,7 +114,7 @@ public class MainActivity extends AppCompatActivity implements NewsAdapter.NewsI
 
     @Override
     public void onLoadFinished(Loader<Void> loader, Void news) {
-        mLoadingIndicator.setVisibility(View.GONE);
+        //mLoadingIndicator.setVisibility(View.GONE);
         //Homework 4 database: Create DatabaseHelper instance, get readable database reference, store in database variable.
         // Store all from database in cursor.
         // Adapter and set adapter moved here from on create.

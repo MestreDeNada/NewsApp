@@ -60,7 +60,7 @@ public class DatabaseUtils {
     }
 
     public static void refreshDatabase(Context context) {
-        ArrayList<NewsItem> newsStories = null;
+        ArrayList<NewsItem> newsStories;
         URL url = NetworkUtils.buildUrl();
 
         SQLiteDatabase db = new DatabaseHelper(context).getWritableDatabase();

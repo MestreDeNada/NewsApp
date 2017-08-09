@@ -19,6 +19,16 @@
             </intent-filter>
         </activity>
         <activity android:name=".Web"></activity>
+
+        <!--Homework 4 firebase: Added this sevice to include Firebase job dispatcher-->
+        <service
+            android:exported="false"
+            android:name=".NewsJob">
+            <intent-filter>
+                <action android:name="com.firebase.jobdispatcher.ACTION_EXECUTE"/>
+            </intent-filter>
+        </service>
+
     </application>
 
 </manifest>
