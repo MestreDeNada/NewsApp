@@ -25,4 +25,6 @@ dependencies {
 
     /*Homework 4 firebase: Added this dependency for firebase job dispatcher.*/
     compile 'com.firebase:firebase-jobdispatcher:0.7.0'
+
+    compile 'com.squareup.picasso:picasso:2.5.2'
 }

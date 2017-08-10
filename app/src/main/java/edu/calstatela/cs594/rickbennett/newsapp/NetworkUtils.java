@@ -39,7 +39,7 @@ public class NetworkUtils {
     private static final String sortBy ="latest";
 
     private static final String PARAM_APIKEY = "apiKey";
-    private static final String key = "9b34213d4efa4824903dd8c2212b85ee"; //Enter your own API key
+    private static final String key = ""; //Enter your own API key
 
     public static URL buildUrl() {
         Uri builtUri = Uri.parse(NEWSAPI_BASE_URL).buildUpon()
@@ -90,8 +90,8 @@ public class NetworkUtils {
 
     //Homework 4 firebase: Added this method for Firebase job dispatcher.
     //Update news every minute.
-    private static final int SCHEDULE_INTERVAL_SECONDS = 60;
-    private static final int SYNC_FLEXTIME_SECONDS = 60;
+    private static final int SCHEDULE_INTERVAL_SECONDS = 30;
+    private static final int SYNC_FLEXTIME_SECONDS = 30;
     private static final String NEWS_JOB_TAG = "news_job_tag";
     private static boolean scheduleInitialized;
 

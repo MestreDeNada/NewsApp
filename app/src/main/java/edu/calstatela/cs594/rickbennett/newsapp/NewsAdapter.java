@@ -6,7 +6,10 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
@@ -15,11 +18,10 @@ import java.util.ArrayList;
  */
 public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.NewsAdapterViewHolder> {
 
-    private ArrayList<NewsItem> mNewsData;
+    private Context context;
 
     //Homework 4 database: Adding cursor for database.
     private Cursor mCursor;
-
     private NewsItemClickListener mClickListener;
 
     //Homework 4 database: Add cursor to the click listener interface.
@@ -35,15 +37,17 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.NewsAdapterVie
 
     public class NewsAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
-        public final TextView mTitleTextView;
-        public final TextView mDescriptionTextView;
-        public final TextView mTimePublishedTextView;
+        private TextView mTitleTextView;
+        private TextView mDescriptionTextView;
+        private TextView mTimePublishedTextView;
+        private ImageView img;
 
         public NewsAdapterViewHolder(View view) {
             super(view);
             mTitleTextView = (TextView) view.findViewById(R.id.tv_news_title);
             mDescriptionTextView = (TextView) view.findViewById(R.id.tv_news_description);
             mTimePublishedTextView = (TextView) view.findViewById(R.id.tv_news_time_published);
+            img = (ImageView) view.findViewById(R.id.img);
             view.setOnClickListener(this);
 
         }
@@ -58,7 +62,7 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.NewsAdapterVie
 
     @Override
     public NewsAdapterViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
-        Context context = viewGroup.getContext();
+        context = viewGroup.getContext();
         LayoutInflater inflater = LayoutInflater.from(context);
         boolean shouldAttachToParentImmediately = false;
 
@@ -75,10 +79,11 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.NewsAdapterVie
         String title = mCursor.getString(mCursor.getColumnIndex(DatabaseContract.Articles.COLUMN_TITLE));
         String description = mCursor.getString(mCursor.getColumnIndex(DatabaseContract.Articles.COLUMN_DESCRIPTION));
         String published = mCursor.getString(mCursor.getColumnIndex(DatabaseContract.Articles.COLUMN_PUBLISHED_AT));
+        String url = mCursor.getString(mCursor.getColumnIndex(DatabaseContract.Articles.COLUMN_URL_TO_IMAGE));
         newsAdapterViewHolder.mTitleTextView.setText(title);
         newsAdapterViewHolder.mDescriptionTextView.setText(description);
         newsAdapterViewHolder.mTimePublishedTextView.setText(published);
-
+        if(url != null) Picasso.with(context).load(url).into(newsAdapterViewHolder.img);
     }
 
     //Homework 4 database: Use cursor.getCount instead of array size.
